@@ -9,7 +9,7 @@ export const MAX_IMPORT_ROWS = 5000;
 export const MAX_IMPORT_COLUMNS = 100;
 export const MAX_IMPORT_CELL_LENGTH = 10_000;
 
-export const importTargets = ["livestock_lot", "lot_event", "input_movement", "economic_entry"] as const;
+export const importTargets = ["livestock_lot", "lot_event", "input_movement", "economic_entry", "cattle_transaction"] as const;
 export type ImportTarget = typeof importTargets[number];
 
 export const targetFields: Record<ImportTarget, Array<{ key: string; label: string; required?: boolean }>> = {
@@ -60,6 +60,29 @@ export const targetFields: Record<ImportTarget, Array<{ key: string; label: stri
     { key: "sourceReference", label: "Referência da origem" },
     { key: "notes", label: "Observações" },
   ],
+  cattle_transaction: [
+    { key: "animalId", label: "ID do animal", required: true },
+    { key: "animalTag", label: "Identificação do animal", required: true },
+    { key: "transactionDate", label: "Data da transação", required: true },
+    { key: "totalWeight", label: "Peso total", required: true },
+    { key: "carcassWeight", label: "Peso da carcaça", required: true },
+    { key: "headWeight", label: "Peso por cabeça", required: true },
+    { key: "pen", label: "Curral" },
+    { key: "supplier", label: "Fornecedor" },
+    { key: "animalValue", label: "Valor do boi", required: true },
+    { key: "pricePerKg", label: "R$/Kg", required: true },
+    { key: "pricePerHead", label: "R$/@", required: true },
+    { key: "status", label: "Situação" },
+    { key: "saleDate", label: "Data venda" },
+    { key: "farmSalePrice", label: "PV Fazenda" },
+    { key: "carcassFarmPrice", label: "PM Carn Faz" },
+    { key: "hookGain", label: "Ganho gancho" },
+    { key: "slaughterhousePrice", label: "PM Abatedor" },
+    { key: "treatmentDays", label: "Trato dias" },
+    { key: "dailyGain", label: "G.M.D" },
+    { key: "paidValue", label: "Valor pago" },
+    { key: "grossProfit", label: "L. Bruto" },
+  ],
 };
 
 const aliasMap: Record<ImportTarget, Record<string, string[]>> = {
@@ -109,6 +132,29 @@ const aliasMap: Record<ImportTarget, Record<string, string[]>> = {
     currency: ["currency", "moeda"],
     sourceReference: ["sourcereference", "origem", "referencia", "documento", "documentoref", "nota"],
     notes: ["notes", "observacoes", "observacao", "notas"],
+  },
+  cattle_transaction: {
+    animalId: ["animalid", "idanimal", "id"],
+    animalTag: ["animaltag", "tag", "identificacao", "identificacaoanimal", "boi"],
+    transactionDate: ["transactiondate", "data", "datatransacao", "datacompra"],
+    totalWeight: ["totalweight", "pesototal", "peso", "peso total"],
+    carcassWeight: ["carcassweight", "pesocarcaça", "pesocarne", "pesocarcaça", "pesocarne"],
+    headWeight: ["headweight", "pesocabeca", "peso@", "peso por cabeça", "peso @"],
+    pen: ["pen", "curral", "curral"],
+    supplier: ["supplier", "fornecedor", "fornec"],
+    animalValue: ["animalvalue", "valoboi", "val boi", "valor boi"],
+    pricePerKg: ["priceperkg", "r$/kg", "r$/kg", "valor/kg"],
+    pricePerHead: ["priceperhead", "r$/@", "r$@", "r$/@", "valor/@", "valor @"],
+    status: ["status", "situacao", "situacão", "status"],
+    saleDate: ["saledate", "data venda", "datavenda", "data_venda"],
+    farmSalePrice: ["farmsaleprice", "pv fazenda", "pv_fazenda"],
+    carcassFarmPrice: ["carcassfarmprice", "pm carn faz", "pm_carn_faz"],
+    hookGain: ["hookgain", "ganho gancho", "ganhogancho"],
+    slaughterhousePrice: ["slaughterhouseprice", "pm abatedor", "pm_abatedor"],
+    treatmentDays: ["treatmentdays", "trato dias", "tratodias"],
+    dailyGain: ["dailygain", "g.m.d", "gmd", "g. m. d"],
+    paidValue: ["paidvalue", "valor pago", "valorpago"],
+    grossProfit: ["grossprofit", "l. bruto", "lbruto", "l.bruto"],
   },
 };
 
@@ -305,6 +351,62 @@ export function normalizeRow(target: ImportTarget, row: Record<string, string>, 
     if (quantity === undefined) throw new Error("Quantidade é obrigatória.");
     return { ...common, inputId, inputSku, lotId, lotCode, movementType: normalizeEnum(rawValue(row, mapping, "movementType"), { entrada: "inbound", inbound: "inbound", consumo: "consumption", consumption: "consumption", transferencia: "transfer", transfer: "transfer", ajuste: "adjustment", adjustment: "adjustment" }, "Tipo do movimento"), movementDate, quantity, unitCost: parseNumber(rawValue(row, mapping, "unitCost"), "Custo unitário") };
   }
+  if (target === "cattle_transaction") {
+    const animalId = boundedText(rawValue(row, mapping, "animalId"), "ID do animal", 60);
+    if (!animalId) throw new Error("ID do animal é obrigatório.");
+    const animalTag = boundedText(rawValue(row, mapping, "animalTag"), "Identificação do animal", 60);
+    if (!animalTag) throw new Error("Identificação do animal é obrigatória.");
+    const transactionDate = parseDate(rawValue(row, mapping, "transactionDate"), "Data da transação");
+    if (!transactionDate) throw new Error("Data da transação é obrigatória.");
+    const totalWeight = parseNumber(rawValue(row, mapping, "totalWeight"), "Peso total");
+    if (totalWeight === undefined) throw new Error("Peso total é obrigatório.");
+    const carcassWeight = parseNumber(rawValue(row, mapping, "carcassWeight"), "Peso da carcaça");
+    if (carcassWeight === undefined) throw new Error("Peso da carcaça é obrigatório.");
+    const headWeight = parseNumber(rawValue(row, mapping, "headWeight"), "Peso por cabeça");
+    if (headWeight === undefined) throw new Error("Peso por cabeça é obrigatório.");
+    const supplier = boundedText(rawValue(row, mapping, "supplier"), "Fornecedor", 160) || undefined;
+    const animalValue = parseNumber(rawValue(row, mapping, "animalValue"), "Valor do boi");
+    if (animalValue === undefined) throw new Error("Valor do boi é obrigatório.");
+    const pricePerKg = parseNumber(rawValue(row, mapping, "pricePerKg"), "R$/Kg");
+    if (pricePerKg === undefined) throw new Error("R$/Kg é obrigatório.");
+    const pricePerHead = parseNumber(rawValue(row, mapping, "pricePerHead"), "R$/@", { maxIntegerDigits: 10, maxFractionDigits: 2 });
+    if (pricePerHead === undefined) throw new Error("R$/@ é obrigatório.");
+    const status = normalizeEnum(rawValue(row, mapping, "status"), { vendido: "sold", sold: "sold", pendente: "pending", pending: "pending", em_andamento: "in_progress", emandamento: "in_progress", aconfirmar: "to_confirm", toconfirm: "to_confirm", confirmar: "to_confirm" }, "Situação", "to_confirm");
+    const pen = boundedText(rawValue(row, mapping, "pen"), "Curral", 20) || undefined;
+    const saleDate = parseDate(rawValue(row, mapping, "saleDate"), "Data venda") || undefined;
+    const farmSalePrice = parseNumber(rawValue(row, mapping, "farmSalePrice"), "PV Fazenda") || undefined;
+    const carcassFarmPrice = parseNumber(rawValue(row, mapping, "carcassFarmPrice"), "PM Carn Faz") || undefined;
+    const hookGain = parseNumber(rawValue(row, mapping, "hookGain"), "Ganho gancho") || undefined;
+    const slaughterhousePrice = parseNumber(rawValue(row, mapping, "slaughterhousePrice"), "PM Abatedor") || undefined;
+    const treatmentDays = parseInteger(rawValue(row, mapping, "treatmentDays"), "Trato dias") || undefined;
+    const dailyGain = parseNumber(rawValue(row, mapping, "dailyGain"), "G.M.D") || undefined;
+    const paidValue = parseNumber(rawValue(row, mapping, "paidValue"), "Valor pago") || undefined;
+    const grossProfit = parseNumber(rawValue(row, mapping, "grossProfit"), "L. Bruto") || undefined;
+    return {
+      ...common,
+      animalId,
+      animalTag,
+      transactionDate,
+      totalWeight,
+      carcassWeight,
+      headWeight,
+      supplier,
+      animalValue,
+      pricePerKg,
+      pricePerHead,
+      status,
+      pen,
+      saleDate,
+      farmSalePrice,
+      carcassFarmPrice,
+      hookGain,
+      slaughterhousePrice,
+      treatmentDays,
+      dailyGain,
+      paidValue,
+      grossProfit,
+    };
+  }
   const businessUnitId = rawValue(row, mapping, "businessUnitId") || defaults.businessUnitId || undefined;
   const businessUnitCode = rawValue(row, mapping, "businessUnitCode") || undefined;
   if (!businessUnitId && !businessUnitCode) throw new Error("Informe o ID ou o código da unidade.");
@@ -362,6 +464,21 @@ export async function resolveAndValidateRow(db: any, organizationId: string, tar
         const duplicate = await db.select({ id: inputMovements.id }).from(inputMovements).where(and(eq(inputMovements.organizationId, organizationId), eq(inputMovements.inputId, input.id), eq(inputMovements.movementDate, normalized.movementDate), eq(inputMovements.movementType, normalized.movementType), eq(inputMovements.sourceReference, normalized.sourceReference))).limit(1);
         if (duplicate[0]) errors.push("Movimentação com a mesma origem já existe.");
       }
+    } else if (target === "cattle_transaction") {
+      // Validar unidade se fornecida
+      const unit = normalized.businessUnitId
+        ? await oneBy(db.select().from(businessUnits).where(and(eq(businessUnits.id, normalized.businessUnitId), eq(businessUnits.organizationId, organizationId))).limit(2), "Unidade")
+        : normalized.businessUnitCode
+          ? await oneBy(db.select().from(businessUnits).where(and(eq(businessUnits.code, normalized.businessUnitCode), eq(businessUnits.organizationId, organizationId))).limit(2), "Unidade")
+          : defaults.businessUnitId
+            ? await oneBy(db.select().from(businessUnits).where(and(eq(businessUnits.id, defaults.businessUnitId), eq(businessUnits.organizationId, organizationId))).limit(2), "Unidade")
+            : undefined;
+      if (normalized.businessUnitId || normalized.businessUnitCode) {
+        if (!unit) errors.push("Unidade não encontrada."); else resolved.businessUnitId = unit.id;
+      }
+      // Validar duplicidade por animal e data
+      const duplicate = await db.select({ id: livestockLots.id }).from(livestockLots).where(and(eq(livestockLots.organizationId, organizationId), eq(livestockLots.lotCode, normalized.animalId))).limit(1);
+      if (duplicate[0]) errors.push("Animal já existe nesta organização.");
     } else {
       const unit = normalized.businessUnitId
         ? await oneBy(db.select().from(businessUnits).where(and(eq(businessUnits.id, normalized.businessUnitId), eq(businessUnits.organizationId, organizationId))).limit(2), "Unidade")
@@ -398,5 +515,6 @@ export function rowDedupeKey(target: ImportTarget, value: Record<string, any>) {
   if (target === "livestock_lot") return `${target}:${value.lotCode}`.toLowerCase();
   if (target === "lot_event") return `${target}:${value.lotId ?? value.lotCode}:${value.eventType}:${value.eventDate}`.toLowerCase();
   if (target === "input_movement") return `${target}:${value.inputId ?? value.inputSku}:${value.movementType}:${value.movementDate}:${value.sourceReference ?? ""}`.toLowerCase();
+  if (target === "cattle_transaction") return `${target}:${value.animalId}:${value.transactionDate}`.toLowerCase();
   return `${target}:${value.businessUnitId ?? value.businessUnitCode}:${value.entryType}:${value.entryDate}:${value.sourceReference ?? ""}`.toLowerCase();
 }

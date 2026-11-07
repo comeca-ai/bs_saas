@@ -395,7 +395,7 @@ export const importBatches = mysqlTable("import_batches", {
   sourceHash: varchar("sourceHash", { length: 64 }).notNull(),
   sourceSize: int("sourceSize").notNull(),
   sourceContent: longtext("sourceContent").notNull(),
-  targetEntity: enumText("targetEntity", ["livestock_lot", "lot_event", "input_movement", "economic_entry"]).notNull(),
+  targetEntity: enumText("targetEntity", ["livestock_lot", "lot_event", "input_movement", "economic_entry", "cattle_transaction"]).notNull(),
   headers: longtext("headers").notNull(),
   mapping: longtext("mapping").notNull(),
   processingToken: varchar("processingToken", { length: 36 }),

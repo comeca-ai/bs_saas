@@ -7,6 +7,16 @@ const targetLabels: Record<string, string> = {
   lot_event: "Eventos e pesagens de lote",
   input_movement: "Movimentações de insumo",
   economic_entry: "Lançamentos econômicos",
+  cattle_transaction: "Gado (Excel)",
+};
+
+// Descrições específicas para cada target (exibidas no mapeamento)
+const targetDescriptions: Record<string, string> = {
+  livestock_lot: "Crie lotes de pecuária com código, regime e data de entrada.",
+  lot_event: "Registre eventos como pesagens, manejo e transferências em lotes.",
+  input_movement: "Controle movimentações de insumos como medicamentos e alimentação.",
+  economic_entry: "Registre lançamentos financeiros como custos e receitas.",
+  cattle_transaction: "Importe dados de transações de gado do Excel (formato fornecido).",
 };
 
 const statusLabels: Record<string, string> = {
@@ -102,7 +112,7 @@ export default function ImportsView() {
     }
     try {
       const contentBase64 = await readFileAsBase64(file);
-      const result = await upload.mutateAsync({ filename: file.name, mimeType: file.type || undefined, contentBase64, targetEntity: targetEntity as "livestock_lot" | "lot_event" | "input_movement" | "economic_entry", businessUnitId: businessUnitId || undefined });
+      const result = await upload.mutateAsync({ filename: file.name, mimeType: file.type || undefined, contentBase64, targetEntity: targetEntity as "livestock_lot" | "lot_event" | "input_movement" | "economic_entry" | "cattle_transaction", businessUnitId: businessUnitId || undefined });
       setActiveId(result.id);
       setMapping(result.mapping);
       setFile(null);
@@ -158,7 +168,7 @@ export default function ImportsView() {
       <section className="panel import-upload-card">
         <div className="panel-header"><div><span className="eyebrow">1 · Receber arquivo</span><h2>Nova importação</h2></div><div className="toolbar-actions"><a className="secondary-button" href="/templates/Template_Dados_Bonanca.xlsx" download="Template_Dados_Bonanca.xlsx"><Download size={14} />Modelo Excel</a><FileSpreadsheet size={18} className="panel-header-icon" /></div></div>
         <form onSubmit={handleUpload}>
-          <label className="import-label">O que este arquivo representa<select value={targetEntity} onChange={event => setTargetEntity(event.target.value)}><option value="livestock_lot">Lotes de pecuária</option><option value="lot_event">Eventos e pesagens de lote</option><option value="input_movement">Movimentações de insumo</option><option value="economic_entry">Lançamentos econômicos</option></select></label>
+          <label className="import-label">O que este arquivo representa<select value={targetEntity} onChange={event => setTargetEntity(event.target.value)}><option value="livestock_lot">Lotes de pecuária</option><option value="lot_event">Eventos e pesagens de lote</option><option value="input_movement">Movimentações de insumo</option><option value="economic_entry">Lançamentos econômicos</option><option value="cattle_transaction">Gado (Excel)</option></select></label>
           <label className="import-label">Unidade padrão <span className="field-hint">opcional, usada quando a planilha não traz a unidade</span><select value={businessUnitId} onChange={event => setBusinessUnitId(event.target.value)}><option value="">Não definir</option>{units.data?.map((unit: any) => <option key={unit.id} value={unit.id}>{unit.code} · {unit.name}</option>)}</select></label>
           <label className={`file-drop ${file ? "has-file" : ""}`}><input type="file" accept=".csv,.xls,.xlsx,.json" onChange={event => setFile(event.target.files?.[0] ?? null)} /><UploadCloud size={20} /><strong>{file ? file.name : "Selecione ou arraste um arquivo"}</strong><span>{file ? `${formatBytes(file.size)} · pronto para leitura` : "Até 5 MB · primeira aba · sem macros ou fórmulas"}</span></label>
           <div className="import-form-note"><FileWarning size={15} /><span>O arquivo original é preservado. Linhas inválidas não são descartadas nem corrigidas automaticamente.</span></div>

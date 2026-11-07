@@ -414,7 +414,3 @@ CREATE TABLE IF NOT EXISTS `users` (
 	CONSTRAINT `users_email_unique` UNIQUE(`email`)
 );
 
---> statement-breakpoint
-ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `passwordHash` text;
---> statement-breakpoint
-ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `status` varchar(40) NOT NULL DEFAULT 'active';

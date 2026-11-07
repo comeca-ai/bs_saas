@@ -1,0 +1,28 @@
+# Isola esta instância da instância já existente (projeto saas_bonanca em /home/ubuntu/balanca)
+services:
+  db:
+    container_name: bonanca2-db
+  pesagem:
+    container_name: bonanca2-pesagem
+  balanca-misturadora:
+    container_name: bonanca2-balanca-misturadora
+  app:
+    container_name: bonanca2-app
+    networks:
+      - bonanca_internal
+      - bonanca_public
+
+volumes:
+  bonanca_mysql_data:
+    name: bonanca2_mysql_data
+  pesagem_data:
+    name: bonanca2_pesagem_data
+  balanca_data:
+    name: bonanca2_balanca_data
+
+networks:
+  bonanca_internal:
+    name: bonanca2_internal
+  bonanca_public:
+    name: bonanca2_public
+    driver: bridge
