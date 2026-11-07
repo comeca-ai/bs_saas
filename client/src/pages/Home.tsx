@@ -32,12 +32,14 @@ import { trpc } from "@/lib/trpc";
 import ImportsView from "./Imports";
 import OperationsView from "./Operations";
 import SaasAdminView from "./SaasAdmin";
+import AnimalsView from "./Animals";
 
 const navItems = [
   { path: "/", label: "Visão geral", icon: BarChart3 },
   { path: "/livestock", label: "Pecuária", icon: Tractor },
   { path: "/operations", label: "Pesagem e alimentação", icon: Activity },
   { path: "/imports", label: "Importação", icon: UploadCloud },
+  { path: "/animals", label: "Animais", icon: Database },
   { path: "/core", label: "Núcleo comum", icon: Layers3 },
   { path: "/data-control", label: "Controle de dados", icon: ShieldCheck },
   { path: "/catalog", label: "Catálogo e KPIs", icon: BookOpen },
@@ -49,6 +51,7 @@ const viewMeta: Record<string, { eyebrow: string; title: string; description: st
   "/livestock": { eyebrow: "Pecuária", title: "Lotes e ciclos operacionais", description: "Acompanhe o que está em campo sem perder a origem do número." },
   "/operations": { eyebrow: "Operação integrada", title: "Pesagem e alimentação", description: "Os serviços especializados operam no mesmo contexto de organização e auditoria do Bonança." },
   "/imports": { eyebrow: "Entrada de dados", title: "Importar sem perder a origem", description: "Receba planilhas, revise o mapeamento e aprove somente o que fizer sentido para o domínio." },
+  "/animals": { eyebrow: "Animais", title: "Lista de animais", description: "Visualize todos os animais importados do Gallagher Animal Performance." },
   "/core": { eyebrow: "Núcleo comum", title: "Estrutura do grupo", description: "Unidades, atividades e operações que sustentam cada domínio." },
   "/data-control": { eyebrow: "Governança", title: "Controle dos dados", description: "Resolva o que precisa de confirmação antes de virar indicador." },
   "/catalog": { eyebrow: "Conhecimento", title: "Catálogo e KPIs", description: "Um significado único para cada campo e cada número de gestão." },
@@ -264,6 +267,7 @@ export default function Home() {
     if (basePath === "/livestock") return <LivestockView />;
     if (basePath === "/operations") return <OperationsView />;
     if (basePath === "/imports") return <ImportsView />;
+    if (basePath === "/animals") return <AnimalsView />;
     if (basePath === "/core") return <CoreView />;
     if (basePath === "/data-control") return <DataControlView />;
     if (basePath === "/catalog") return <CatalogView />;
