@@ -19,6 +19,15 @@ const targetDescriptions: Record<string, string> = {
   cattle_transaction: "Importe dados de transações de gado do Excel (formato fornecido).",
 };
 
+// Descrições específicas para cada target (exibidas no mapeamento)
+const targetDescriptions: Record<string, string> = {
+  livestock_lot: "Crie lotes de pecuária com código, regime e data de entrada.",
+  lot_event: "Registre eventos como pesagens, manejo e transferências em lotes.",
+  input_movement: "Controle movimentações de insumos como medicamentos e alimentação.",
+  economic_entry: "Registre lançamentos financeiros como custos e receitas.",
+  cattle_transaction: "Importe dados de transações de gado do Excel (formato fornecido).",
+};
+
 const statusLabels: Record<string, string> = {
   uploaded: "Recebido",
   mapped: "Mapeado",
